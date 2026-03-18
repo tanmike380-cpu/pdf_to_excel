@@ -1,4 +1,4 @@
-# 招商青岛 POC（PDF/图片 → JSON → Excel → 术语标准化中文）
+# （PDF/图片 → JSON → Excel → 术语标准化中文）
 
 ## 1. 项目目标
 
