@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 """集中配置（路径/模型/词库等）。"""
 
+import os
+
 # ===== GLM =====
-GLM_API_KEY = "8b891b73586342c78ad3a257ab88e5ca.bdZp0Q0rXLte8KZ9"
+GLM_API_KEY = os.environ.get("GLM_API_KEY", "")
+if not GLM_API_KEY:
+    raise SystemExit(
+        "GLM_API_KEY 未设置。请 export GLM_API_KEY=your_key 后重试。"
+    )
 GLM_MODEL_VISION = "GLM-4.6V"
 GLM_MODEL_TEXT = "GLM-5"
 
