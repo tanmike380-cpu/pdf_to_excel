@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes_health import router as health_router
 from app.api.routes_parse import router as parse_router
 from app.api.routes_download import router as download_router
+from app.api.routes_vocab import router as vocab_router
 from app.services.cleanup_service import schedule_cleanup_task
 from app.core.logger import get_logger
 
@@ -33,7 +34,7 @@ app = FastAPI(
 # CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict this
+    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,6 +44,7 @@ app.add_middleware(
 app.include_router(health_router, tags=["Health"])
 app.include_router(parse_router, tags=["Parse"])
 app.include_router(download_router, tags=["Download"])
+app.include_router(vocab_router)
 
 
 @app.get("/")

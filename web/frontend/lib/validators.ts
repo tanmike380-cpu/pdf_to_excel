@@ -1,5 +1,5 @@
 const ALLOWED_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".txt"];
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB (increased for large dictionary files)
 
 export function validateFile(file: File): string | null {
   const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
@@ -13,29 +13,6 @@ export function validateFile(file: File): string | null {
     return "File is empty";
   }
   return null;
-}
-
-export function validateTranslationRules(text: string): string[] {
-  const errors: string[] = [];
-  if (!text.trim()) return errors;
-  
-  const lines = text.trim().split("\n");
-  lines.forEach((line, i) => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) return;
-    if (!trimmed.includes("=")) {
-      errors.push(`Line ${i + 1}: missing '=', expected format 'key=value'`);
-    } else {
-      const [key, ...rest] = trimmed.split("=");
-      if (!key.trim()) {
-        errors.push(`Line ${i + 1}: empty key`);
-      }
-      if (!rest.join("=").trim()) {
-        errors.push(`Line ${i + 1}: empty value`);
-      }
-    }
-  });
-  return errors;
 }
 
 export function validateSheetTitle(title: string): string | null {

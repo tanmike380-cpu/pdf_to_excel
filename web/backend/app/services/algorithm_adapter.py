@@ -13,9 +13,19 @@ from typing import Dict, List, Optional
 import pandas as pd
 
 # Add parent directories to path to import algorithm modules
-ALGORITHM_ROOT = Path(__file__).parent.parent.parent.parent
+ALGORITHM_ROOT = Path(__file__).parent.parent.parent.parent.parent
 if str(ALGORITHM_ROOT) not in sys.path:
     sys.path.insert(0, str(ALGORITHM_ROOT))
+
+# Load .env file FIRST before importing config
+env_file = Path(__file__).parent.parent.parent / ".env"
+if env_file.exists():
+    with open(env_file, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, value = line.split("=", 1)
+                os.environ.setdefault(key.strip(), value.strip())
 
 from zai import ZhipuAiClient
 
@@ -26,12 +36,21 @@ logger = get_logger("algorithm_adapter")
 
 # Import algorithm components
 try:
-    from config.settings import GLM_API_KEY, GLM_MODEL_VISION, GLM_MODEL_TEXT, DOMAIN_CONTEXT, IMAGE_FOLDER_SUFFIX
     from convert_png.pdf_to_png import pdf_to_images_folder
     from vocab_mapper import load_vocab
 except ImportError as e:
     logger.error(f"Failed to import algorithm modules: {e}")
     raise
+
+# Load config from environment (already loaded from .env above)
+GLM_API_KEY = os.environ.get("GLM_API_KEY", "")
+GLM_MODEL_VISION = os.environ.get("GLM_MODEL_VISION", "GLM-4.6V")
+GLM_MODEL_TEXT = os.environ.get("GLM_MODEL_TEXT", "GLM-5")
+DOMAIN_CONTEXT = os.environ.get("DOMAIN_CONTEXT", "这是招商工业港口物流单/发票箱单场景，内容多为船舶机电/消防系统/备件等术语。")
+IMAGE_FOLDER_SUFFIX = os.environ.get("IMAGE_FOLDER_SUFFIX", "Image")
+
+if not GLM_API_KEY:
+    logger.warning("GLM_API_KEY not set. Some features may not be available.")
 
 
 def build_custom_extract_prompt(

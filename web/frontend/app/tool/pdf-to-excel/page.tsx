@@ -6,7 +6,6 @@ import FileUploadCard from "@/components/file-upload-card";
 import DocumentTypeSelect from "@/components/document-type-select";
 import TargetColumnsInput from "@/components/target-columns-input";
 import SceneDescriptionTextarea from "@/components/scene-description-textarea";
-import TranslationRulesTextarea from "@/components/translation-rules-textarea";
 import SheetTitleInput from "@/components/sheet-title-input";
 import SubmitButton from "@/components/submit-button";
 import ResultTable from "@/components/result-table";
@@ -14,9 +13,11 @@ import DownloadButton from "@/components/download-button";
 import ErrorAlert from "@/components/error-alert";
 import MissingFieldsCard from "@/components/missing-fields-card";
 import LoadingStatus from "@/components/loading-status";
+import VocabSelector from "@/components/vocab-selector";
+import VocabBuilder from "@/components/vocab-builder";
 import { ToolFormState, ParseResultState } from "@/types/api";
 import { parseFile, getDownloadUrl } from "@/lib/api";
-import { validateFile, validateTranslationRules, validateSheetTitle } from "@/lib/validators";
+import { validateFile, validateSheetTitle } from "@/lib/validators";
 
 export default function ToolPage() {
   const [form, setForm] = useState<ToolFormState>({
@@ -24,8 +25,9 @@ export default function ToolPage() {
     documentType: "auto_detect",
     targetColumnsText: "",
     sceneDescription: "",
-    translationRulesText: "",
     sheetTitle: "Extraction Result",
+    vocabId: "",
+    translationRulesText: "", // Legacy, kept for backward compatibility
   });
 
   const [result, setResult] = useState<ParseResultState>({
@@ -42,6 +44,10 @@ export default function ToolPage() {
     setResult({ status: "idle", previewRows: [], previewColumns: [] });
   };
 
+  const handleVocabBuildSuccess = (vocabId: string) => {
+    setForm((prev) => ({ ...prev, vocabId }));
+  };
+
   const handleSubmit = async () => {
     // Validate
     const errors: string[] = [];
@@ -52,9 +58,6 @@ export default function ToolPage() {
       const fileError = validateFile(form.file);
       if (fileError) errors.push(fileError);
     }
-
-    const ruleErrors = validateTranslationRules(form.translationRulesText);
-    errors.push(...ruleErrors);
 
     const titleError = validateSheetTitle(form.sheetTitle);
     if (titleError) errors.push(titleError);
@@ -77,6 +80,7 @@ export default function ToolPage() {
         sceneDescription: form.sceneDescription,
         translationRules: form.translationRulesText,
         sheetTitle: form.sheetTitle,
+        vocabId: form.vocabId,
       });
 
       if (response.success) {
@@ -112,8 +116,9 @@ export default function ToolPage() {
       documentType: "auto_detect",
       targetColumnsText: "",
       sceneDescription: "",
-      translationRulesText: "",
       sheetTitle: "Extraction Result",
+      vocabId: "",
+      translationRulesText: "",
     });
     setResult({ status: "idle", previewRows: [], previewColumns: [] });
     setValidationErrors([]);
@@ -153,9 +158,16 @@ export default function ToolPage() {
                 disabled={result.status === "uploading" || result.status === "processing"}
               />
 
-              <TranslationRulesTextarea
-                value={form.translationRulesText}
-                onChange={(v) => setForm((prev) => ({ ...prev, translationRulesText: v }))}
+              {/* Vocabulary Selection */}
+              <VocabSelector
+                value={form.vocabId}
+                onChange={(v) => setForm((prev) => ({ ...prev, vocabId: v }))}
+                disabled={result.status === "uploading" || result.status === "processing"}
+              />
+
+              {/* Vocabulary Builder */}
+              <VocabBuilder
+                onBuildSuccess={handleVocabBuildSuccess}
                 disabled={result.status === "uploading" || result.status === "processing"}
               />
 

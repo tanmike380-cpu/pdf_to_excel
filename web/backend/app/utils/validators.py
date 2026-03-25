@@ -3,16 +3,27 @@
 import os
 from typing import Optional
 
+# Allowed extensions for document parsing
 ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".txt"}
-MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
+
+# Allowed extensions for vocabulary files
+VOCAB_ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".xlsx", ".xls", ".txt", ".csv"}
+
+MAX_FILE_SIZE = 200 * 1024 * 1024  # 200MB (increased for large dictionary files)
 
 
-def validate_file_extension(filename: str) -> tuple[bool, Optional[str]]:
+def validate_file_extension(filename: str, allowed_extensions: set = None) -> tuple[bool, Optional[str]]:
     """Check if file extension is allowed. Returns (is_valid, error_message)."""
+    allowed = allowed_extensions or ALLOWED_EXTENSIONS
     ext = os.path.splitext(filename)[1].lower()
-    if ext not in ALLOWED_EXTENSIONS:
-        return False, f"Unsupported file format: {ext}. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
+    if ext not in allowed:
+        return False, f"Unsupported file format: {ext}. Allowed: {', '.join(allowed)}"
     return True, None
+
+
+def validate_vocab_file_extension(filename: str) -> tuple[bool, Optional[str]]:
+    """Check if vocabulary file extension is allowed."""
+    return validate_file_extension(filename, VOCAB_ALLOWED_EXTENSIONS)
 
 
 def validate_file_size(size: int) -> tuple[bool, Optional[str]]:
